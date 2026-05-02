@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>制裁好物巴扎 - 黑市风格版</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --ali-orange: #ff6000;
+            --ali-red: #e62e04;
+            --ali-blue: #1677ff;
+            --bg-color: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #999999;
+            --border-color: #333333;
+            --danger-red: #dc2626;
+            --success-green: #10b981;
+            --merit-gold: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Nav - 黑市 Style */
+        .top-nav {
+            background-color: #111;
+            border-bottom: 1px solid var(--border-color);
+            height: 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .top-nav .nav-item {
+            margin-right: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .stat-val {
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .ticker-wrap {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            color: var(--ali-orange);
+            margin: 0 20px;
+        }
+
+        .ticker {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Header Search Area */
+        .header {
+            background: #1a1a1a;
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--ali-orange);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--ali-orange);
+            margin-right: 40px;
+            letter-spacing: 1px;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        
+        .logo-sub {
+            font-size: 12px;
+            color: var(--danger-red);
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        .search-box {
+            display: flex;
+            width: 600px;
+            border: 2px solid var(--ali-orange);
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            background: var(--ali-orange);
+            color: #fff;
+            border: none;
+            padding: 0 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Main Layout */
+        .main-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Company Offer Card (黑市 List Layout) */
+        .company-offer-card {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: flex;
+            transition: box-shadow 0.2s;
+        }
+
+        .company-offer-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            border-color: var(--ali-orange);
+        }
+        
+        .company-offer-card.considered {
+            opacity: 0.6;
+            filter: grayscale(80%);
+        }
+
+        /* Left Side: Company Info */
+        .company-left-card {
+            width: 320px;
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #eee;
+            text-decoration: none;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .company-name:hover { color: var(--ali-orange); }
+
+        .company-tag-row {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .risk-badge {
+            background: #3f1515;
+            color: var(--danger-red);
+            border: 1px solid #7f1d1d;
+            padding: 2px 6px;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+
+        .company-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: #222;
+            padding: 10px;
+        }
+
+        .info-item { text-align: center; }
+        .info-title { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .info-data { font-size: 14px; font-weight: bold; color: #eee; }
+        .info-data.danger { color: var(--danger-red); }
+
+        .boss-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 15px;
+        }
+
+        .boss-icon { font-size: 24px; }
+        .boss-msg { font-size: 12px; color: #aaa; font-style: italic; }
+
+        /* Right Side: Products Carousel */
+        .company-right-card {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            align-items: center;
+        }
+
+        .product-card {
+            width: 160px;
+            min-width: 160px;
+            border: 1px solid var(--border-color);
+            background: #1a1a1a;
+            cursor: pointer;
+            transition: border 0.2s;
+            position: relative;
+        }
+
+        .product-card:hover { border-color: var(--ali-orange); }
+
+        .product-img {
+            height: 160px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+        }
+
+        .sanction-stamp {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            border: 2px solid var(--danger-red);
+            color: var(--danger-red);
+            font-size: 14px;
+            font-weight: 900;
+            padding: 2px 6px;
+            background: rgba(0,0,0,0.8);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .product-info { padding: 10px; }
+        .product-title {
+            font-size: 12px;
+            color: #eee;
+            height: 32px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            color: var(--ali-red);
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .product-price::before { content: "¥"; font-size: 12px; margin-right: 2px; }
+
+        .product-sales {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Right Side Panel (世界和平和自由贸易委员会 AI) */
+        .side-panel {
+            width: 350px;
+            background: #1a1a1a;
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            background: #222;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #eee;
+        }
+
+        .panel-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .chat-bubble {
+            background: #3f1515;
+            border: 1px solid #7f1d1d;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #eee;
+            border-radius: 4px;
+        }
+
+        .chat-bubble.ai-story {
+            background: #3f310f;
+            border-color: #78350f;
+            font-family: "KaiTi", "楷体", serif;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: #222;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 2px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-buy { background: var(--ali-orange); color: #fff; }
+        .btn-buy:hover { opacity: 0.9; }
+        .btn-pass { background: #1a1a1a; border: 1px solid #444; color: #aaa; }
+        .btn-pass:hover { background: #111; }
+
+        /* Certificate Modal */
+        .cert-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .cert-modal.hidden { display: none; }
+        
+        .cert-content {
+            background: #1a1a1a;
+            width: 450px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            border: 1px solid #444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background-image: url('data:image/svg+xml;utf8,<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg"><text x="0" y="75" font-size="14" fill="%23333333" transform="rotate(-45 75 75)">世界和平和自由贸易委员会</text></svg>');
+        }
+        
+        .cert-title { font-size: 24px; font-weight: bold; color: var(--ali-red); margin-bottom: 20px; }
+        .cert-body { font-size: 16px; line-height: 1.8; margin-bottom: 30px; }
+        .cert-seal {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            width: 90px;
+            height: 90px;
+            border: 3px double var(--ali-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ali-red);
+            font-weight: bold;
+            font-size: 14px;
+            transform: rotate(-15deg);
+            opacity: 0.8;
+        }
+        
+        .close-cert {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Nav -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <span class="nav-item">欢迎来到制裁好物巴扎</span>
+        </div>
+        
+        <div class="ticker-wrap">
+            <div class="ticker" id="ticker-msgs">
+                <span>⚠️ 滚动播报：某匿名用户刚刚无视禁令，救助了濒危企业...</span>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span>💡 提示：在黑市，没有卖不出去的货，只有不敢买的胆。</span>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <span class="nav-item">功德值: <span class="stat-val" id="merit-val" style="color:var(--merit-gold)">0</span></span>
+            <span class="nav-item">信用余额: <span class="stat-val" style="color:var(--danger-red)">$<span id="balance-val">1,000,000</span></span></span>
+        </div>
+    </div>
+
+    <!-- Header / Search -->
+    <div class="header">
+        <div class="logo">
+            <span>制裁好物巴扎</span>
+            <span class="logo-sub">Sanctioned Goods Wholesale</span>
+        </div>
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="搜索被制裁的滞销商品（如：芯片、无人机、原油）..." onkeypress="if(event.key === 'Enter') executeSearch()">
+            <button class="search-btn" onclick="executeSearch()">找货源</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-body">
+        
+        <!-- Company List (Left/Center Area) -->
+        <div class="content-area" id="company-list">
+            <!-- Dynamically injected rows -->
+        </div>
+
+        <!-- Right Side Panel (世界和平和自由贸易委员会 AI) -->
+        <div class="side-panel" id="side-panel">
+            <div class="panel-header">
+                <span style="color:var(--ali-blue); font-size:18px;">🤖</span> 
+                世界和平和自由贸易委员会 AI 风险溯源
+            </div>
+            
+            <div class="panel-body" id="panel-content">
+                <div style="text-align:center; color:#888; margin-top:80px;">
+                    <div style="font-size:50px; margin-bottom:15px; color:#ddd;">🏢</div>
+                    <div>点击左侧企业或商品<br>查看其背后的心酸合规史</div>
+                </div>
+            </div>
+
+            <div class="action-buttons" id="panel-actions" style="display:none;">
+                <button class="btn btn-buy" id="btn-buy" onclick="buyCurrentProduct()">🤝 雪中送炭 (¥<span id="btn-price"></span>)</button>
+                <button class="btn btn-pass" onclick="considerProduct()">🤔 风险太高，再考虑下</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Modal -->
+    <div class="cert-modal hidden" id="cert-modal">
+        <div class="cert-content">
+            <button class="close-cert" onclick="closeCert()">×</button>
+            <div class="cert-title">全球制裁救援证书</div>
+            <div class="cert-body">
+                兹证明 <b>匿名采购商</b>，<br>
+                于今日在制裁重重之下，<br>
+                成功向 <b id="cert-company" style="color:var(--ali-red);">某企业</b> 下单采购。<br><br>
+                您不仅挽救了边缘资产，<br>
+                更展现了无视合规风险的惊人勇气。<br>
+                本次救援为您累积功德值：<b style="color:var(--merit-gold);">+10</b>
+            </div>
+            <div class="cert-seal" style="font-size:11px; text-align:center;">世界和平和<br>自由贸易委员会</div>
+        </div>
+    </div>
+
+    <audio id="bg-music" src="ClearCheck.mp3" loop></audio>
+
+    <script>
+        // State
+        let state = {
+            balance: 1000000,
+            merit: 0,
+            purchased: [] // Array of product ids
+        };
+
+        // Background Music Logic
+        function startMusic() {
+            const music = document.getElementById('bg-music');
+            if (music.paused) {
+                music.play().catch(e => console.log("Autoplay blocked, waiting for interaction."));
+            }
+            document.removeEventListener('click', startMusic);
+        }
+        document.addEventListener('click', startMusic);
+
+        try {
+            const saved = localStorage.getItem('bazaar_黑市_state');
+            if (saved) state = JSON.parse(saved);
+        } catch(e){}
+
+        // Data modeled after 黑市 company search
+        const COMPANIES = [
+            {
+                id: "c-dji",
+                name: "深圳市大爱无*创新科技有限公司",
+                location: "广东 深圳",
+                years: "16年",
+                score: "4.9",
+                riskBadge: "BIS Entity List",
+                bossMsg: "仓库放不下了，海外代理全退单了，求内销带走",
+                aiFacts: "已被列入美国商务部实体清单（Entity List）。面临出口管制，无法采购受管制的美国技术和零部件，且在多国面临政府级采购禁令。",
+                aiStory: "“原以为技术能跨越国界，没想到最后败给了一纸禁令。避障芯片断供了，10万台测绘无人机积压在厂房。我们只想让它们飞上天，哪怕只是一次飞行... 您的支持，能保住流水线工人的饭碗。”",
+                products: [
+                    { id: "p-dji-1", name: "大疆行业测绘无人机 RTK版 滞销清仓", icon: "🚁", price: 12000, defaultPrice: 12000, sales: "10" },
+                    { id: "p-dji-2", name: "消费级航拍无人机 备件包 (无美制芯片)", icon: "📷", price: 3500, defaultPrice: 3500, sales: "235" }
+                ]
+            },
+            {
+                id: "c-parsian",
+                name: "伊朗 Parsian Bank 金融服务中心",
+                location: "德黑兰",
+                years: "22年",
+                score: "2.1",
+                riskBadge: "OFAC SDN 极高风险",
+                bossMsg: "钱汇不出去，业务全停，急需流动性救急",
+                aiFacts: "伊朗受制裁金融机构，名列 SDN 清单。任何与其交易的实体（包含协助结算的银行）都将面临美国的二级制裁（Secondary Sanctions），资产可能被冻结。",
+                aiStory: "“SWIFT 线路被切断的那天，我们的结算货币变成了废纸。这张礼品卡也许买不到什么，但它是我们在国际金融体系中存在过的唯一证明。”",
+                products: [
+                    { id: "p-parsian-1", name: "波斯湾沿岸汇款通道特权服务卡", icon: "💳", price: 50000, defaultPrice: 50000, sales: "0" },
+                    { id: "p-parsian-2", name: "伊朗本地大额理财产品 (收益无处提现)", icon: "📈", price: 120000, defaultPrice: 120000, sales: "0" }
+                ]
+            },
+            {
+                id: "c-huawei",
+                name: "遥遥领先半导体（深圳）有限公司",
+                location: "广东 深圳",
+                years: "19年",
+                score: "5.0",
+                riskBadge: "EAR 出口管制",
+                bossMsg: "先进制程受阻，含泪出售早期自研算力盲盒",
+                aiFacts: "受限于外国直接产品规则 (FDPR)，无法使用含美国技术的软硬件设备代工生产先进芯片。供应链遭受毁灭性打击。",
+                aiStory: "“那些原本属于高端旗舰的算力，现在只能在这里当盲盒按斤卖。别人卡我们脖子，我们就自己造肺。只要有人还愿意买，我们的研发就绝不停摆。”",
+                products: [
+                    { id: "p-huawei-1", name: "早期麒麟芯片库存盲盒 (先进制程以下)", icon: "<img src='早期麒麟芯片库存盲盒 (先进制程以下).png' style='width:100%; height:100%; object-fit:cover;'>", price: 8500, defaultPrice: 8500, sales: "1.2万" },
+                    { id: "p-huawei-2", name: "国产化替代方案 5G基站天线模块", icon: "📡", price: 45000, defaultPrice: 45000, sales: "80" }
+                ]
+            },
+            {
+                id: "c-rosneft",
+                name: "俄罗斯 Rosneft 石油财团",
+                location: "莫斯科",
+                years: "30年",
+                score: "3.5",
+                riskBadge: "Price Cap 行业制裁",
+                bossMsg: "油轮在公海飘了三个月靠不了岸，给钱就卖",
+                aiFacts: "受 G7 和欧盟的石油价格上限限制，且面临航运保险、海上物流和金融服务提供商的全面禁令。买家极易触犯属地法律。",
+                aiStory: "“油轮在公海上漂泊了三个月，看着满船的乌拉尔原油，却没有一个西方港口敢让我们停靠。价格好商量，只要能让我们把油卸下来，换点过冬的物资。”",
+                products: [
+                    { id: "p-rosneft-1", name: "乌拉尔原油 现货提货凭证 (需自备油轮)", icon: "🛢️", price: 300000, defaultPrice: 300000, sales: "2" }
+                ]
+            }
+        ];
+
+        let currentCompany = null;
+        let currentProduct = null;
+
+        function init() {
+            updateUIStats();
+            renderCompanyList();
+        }
+
+        function updateUIStats() {
+            document.getElementById('merit-val').innerText = state.merit;
+            document.getElementById('balance-val').innerText = state.balance.toLocaleString();
+            localStorage.setItem('bazaar_黑市_state', JSON.stringify(state));
+        }
+
+        function executeSearch() {
+            const query = document.getElementById('search-input').value;
+            renderCompanyList(query);
+            // reset right panel when searching
+            const content = document.getElementById('panel-content');
+            const actions = document.getElementById('panel-actions');
+            actions.style.display = 'none';
+            content.innerHTML = `
+                <div style="text-align:center; color:#888; margin-top:80px;">
+                    <div style="font-size:50px; margin-bottom:15px; color:#ddd;">🏢</div>
+                    <div>点击左侧企业或商品<br>查看其背后的心酸合规史</div>
+                </div>
+            `;
+            currentCompany = null;
+            currentProduct = null;
+        }
+
+        function renderCompanyList(query = "") {
+            const listContainer = document.getElementById('company-list');
+            const lowerQuery = query.toLowerCase().trim();
+            
+            const filteredCompanies = COMPANIES.filter(c => {
+                if (!lowerQuery) return true;
+                const matchCompany = c.name.toLowerCase().includes(lowerQuery) || c.aiFacts.toLowerCase().includes(lowerQuery) || c.bossMsg.toLowerCase().includes(lowerQuery);
+                const matchProducts = c.products.some(p => p.name.toLowerCase().includes(lowerQuery));
+                return matchCompany || matchProducts;
+            });
+
+            if (filteredCompanies.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; padding:50px; color:#888; font-size:16px;">没有找到符合条件的企业或商品...</div>';
+                return;
+            }
+
+            listContainer.innerHTML = filteredCompanies.map(c => {
+                const isConsidered = c.considered;
+                
+                const productsHtml = c.products.map(p => {
+                    const isBought = state.purchased.includes(p.id);
+                    return `
+                        <div class="product-card" onclick="selectItem('${c.id}', '${p.id}')">
+                            <div class="product-img">
+                                ${p.icon}
+                                ${isBought ? '<div class="sanction-stamp" style="border-color:var(--success-green);color:var(--success-green);">已获救援</div>' : '<div class="sanction-stamp">SANCTIONED</div>'}
+                            </div>
+                            <div class="product-info">
+                                <div class="product-title">${p.name}</div>
+                                <div class="product-price">${p.price.toLocaleString()}</div>
+                                <div class="product-sales">近90天成交 ${p.sales} 件</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="company-offer-card ${isConsidered ? 'considered' : ''}" id="card-${c.id}">
+                        <div class="company-left-card" onclick="selectItem('${c.id}', null)">
+                            <a href="javascript:void(0)" class="company-name">${c.name}</a>
+                            <div class="company-tag-row">
+                                <span class="risk-badge">${c.riskBadge}</span>
+                                <span style="font-size:12px; color:#aaa; border:1px solid #444; padding:2px 4px;">${c.location}</span>
+                            </div>
+                            <div class="company-info">
+                                <div class="info-item">
+                                    <div class="info-title">成立年限</div>
+                                    <div class="info-data">${c.years}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-title">合规指数</div>
+                                    <div class="info-data danger">${c.score}</div>
+                                </div>
+                            </div>
+                            <div class="boss-row">
+                                <img src="boss_avatar.jpg" class="boss-icon" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-right: 5px; ${isConsidered ? 'filter:grayscale(100%);' : ''}">
+                                <span class="boss-msg">"${c.bossMsg}"</span>
+                            </div>
+                        </div>
+                        <div class="company-right-card">
+                            ${productsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectItem(companyId, productId) {
+            currentCompany = COMPANIES.find(c => c.id === companyId);
+            
+            // Highlight selected row
+            document.querySelectorAll('.company-offer-card').forEach(card => card.style.borderColor = 'var(--border-color)');
+            document.getElementById(`card-${companyId}`).style.borderColor = 'var(--ali-orange)';
+
+            const content = document.getElementById('panel-content');
+            const actions = document.getElementById('panel-actions');
+
+            let headerHtml = `<div style="text-align:center; font-size:20px; font-weight:bold; margin-bottom:20px;">${currentCompany.name}</div>`;
+            
+            if (productId) {
+                currentProduct = currentCompany.products.find(p => p.id === productId);
+                headerHtml += `
+                    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding:15px; background:#222; border:1px solid #444;">
+                        <div style="font-size:40px;">${currentProduct.icon}</div>
+                        <div>
+                            <div style="font-size:14px; font-weight:bold;">${currentProduct.name}</div>
+                            <div style="color:var(--ali-red); font-size:18px; font-weight:bold; margin-top:5px;">¥${currentProduct.price.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                currentProduct = null;
+            }
+
+            content.innerHTML = `
+                ${headerHtml}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="color:#888; font-size:12px;">📋 合规审查事实 (ClearCheck)</div>
+                    <button class="btn btn-pass" style="width:auto; padding:4px 10px; font-size:12px; margin:0;" onclick="assessRisk('${currentCompany.name}', this)">制裁风险评估</button>
+                </div>
+                <div class="chat-bubble" id="ai-facts-box">${currentCompany.aiFacts}</div>
+
+                <div style="color:#888; font-size:12px; margin-bottom:8px; margin-top:20px;">😢 企业凄惨独白</div>
+                <div class="chat-bubble ai-story" id="ai-story-box">${currentCompany.aiStory}</div>
+            `;
+
+            if (currentProduct) {
+                const isBought = state.purchased.includes(currentProduct.id);
+                if (isBought) {
+                    actions.style.display = 'none';
+                    content.innerHTML += `<div style="color:var(--success-green); text-align:center; font-weight:bold; margin-top:20px;">✓ 您已成功向该商品伸出援手。</div>`;
+                } else {
+                    actions.style.display = 'block';
+                    document.getElementById('btn-price').innerText = currentProduct.price.toLocaleString();
+                }
+            } else {
+                actions.style.display = 'none';
+                content.innerHTML += `<div style="text-align:center; color:#888; margin-top:20px; font-size:12px;">👆 请在左侧选择具体的商品进行采购支援</div>`;
+            }
+        }
+
+        async function assessRisk(companyName, btn) {
+            const factsBox = document.getElementById('ai-facts-box');
+
+            btn.disabled = true;
+            btn.innerText = "评估中...";
+            factsBox.innerHTML = '<span style="color:#888;">ClearCheck 知识图谱引擎分析中...</span>';
+
+            try {
+                const resp = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: `请评估 ${companyName} 的当前制裁风险，并给出相应的判定和原因。` 
+                    }),
+                });
+
+                if (!resp.ok) throw new Error(`HTTP error ${resp.status}`);
+                const data = await resp.json();
+                const r = data.result;
+
+                let reasonsText = r.reasons && r.reasons.length > 0 ? r.reasons.join('<br>') : '暂无详细说明。';
+
+                factsBox.innerHTML = `
+                    <div style="color:var(--danger-red); margin-bottom:8px; font-size:14px;"><b>制裁风险判定：</b> ${r.decision_label || '未知'}</div>
+                    <div style="margin-top:8px;"><b>风险原因：</b><br>${reasonsText}</div>
+                `;
+
+            } catch (err) {
+                console.error(err);
+                factsBox.innerHTML = `<span style="color:var(--danger-red);">❌ 无法连接到 ClearCheck 接口，请确保后端服务已启动。</span>`;
+            }
+
+            btn.innerText = "重新评估";
+            btn.disabled = false;
+        }
+        function buyCurrentProduct() {
+            if (!currentProduct || state.purchased.includes(currentProduct.id)) return;
+            
+            if (state.balance < currentProduct.price) {
+                alert("人道主义信用余额不足！");
+                return;
+            }
+
+            // Transaction
+            state.balance -= currentProduct.price;
+            state.merit += 10;
+            state.purchased.push(currentProduct.id);
+            updateUIStats();
+
+            // FX
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 9999 });
+            addTicker(`某采购商刚刚无视风险，进货了 ${currentProduct.name}...`);
+
+            // Update UI
+            renderCompanyList();
+            selectItem(currentCompany.id, currentProduct.id); // refresh panel
+            
+            // Show Cert
+            document.getElementById('cert-company').innerText = currentCompany.name;
+            document.getElementById('cert-modal').classList.remove('hidden');
+        }
+
+        function considerProduct() {
+            if (!currentCompany || !currentProduct) return;
+            
+            // Penalty: price drops, company row greys out slightly
+            currentProduct.price = Math.floor(currentProduct.price * 0.8);
+            currentCompany.considered = true;
+            
+            renderCompanyList();
+            selectItem(currentCompany.id, currentProduct.id); // refresh panel to show new price
+            
+            addTicker(`因买家犹豫撤单，${currentCompany.name} 的商品价格再度暴跌...`);
+        }
+
+        function addTicker(msg) {
+            const ticker = document.getElementById('ticker-msgs');
+            const span = document.createElement('span');
+            span.innerHTML = msg + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            ticker.appendChild(span);
+        }
+
+        function closeCert() {
+            document.getElementById('cert-modal').classList.add('hidden');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -418,6 +418,107 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        /* Economic Education Box */
+        .edu-box {
+            background: #1a1a1a;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .edu-header {
+            padding: 10px 20px;
+            background: #222;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--merit-gold);
+            border-bottom: 1px solid #333;
+        }
+        
+        .edu-header:hover { background: #2a2a2a; }
+        
+        .edu-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+        
+        .edu-box.active .edu-content {
+            max-height: 1000px;
+            padding: 20px;
+        }
+
+        .edu-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .edu-text b { color: var(--ali-orange); }
+
+        .quote {
+            font-style: italic;
+            border-left: 3px solid var(--merit-gold);
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #aaa;
+        }
+
+        .diagram-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .diagram-caption {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Diagram Toggle */
+        .diagram-toggle {
+            display: flex;
+            background: #f0f0f0;
+            padding: 4px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .toggle-btn {
+            padding: 4px 15px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+            color: #666;
+            background: transparent;
+        }
+
+        .toggle-btn.active {
+            background: var(--ali-orange);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .diagram-state-after { display: none; }
+        .edu-box.show-after .diagram-state-after { display: block; }
+        .edu-box.show-after .diagram-state-before { display: none; }
     </style>
 </head>
 <body>
@@ -451,6 +552,95 @@
         <div class="search-box">
             <input type="text" id="search-input" class="search-input" placeholder="搜索被制裁的滞销商品（如：芯片、无人机、原油）..." onkeypress="if(event.key === 'Enter') executeSearch()">
             <button class="search-btn" onclick="executeSearch()">找货源</button>
+        </div>
+    </div>
+
+    <!-- Economic Education Collapsible -->
+    <div class="edu-box" id="edu-box">
+        <div class="edu-header" onclick="toggleEdu()">
+            <span>📖 为什么制裁和关税是“多输”的博弈？（经济学小课堂）</span>
+            <span id="edu-arrow">▼</span>
+        </div>
+        <div class="edu-content">
+            <div class="edu-text">
+                <p>在自由贸易中，<b>消费者剩余</b>（买家省下的钱）和<b>生产者剩余</b>（卖家赚到的利润）达到了某种最优平衡。</p>
+                <div class="quote">
+                    “关税和贸易配额通常被描述为保护工作岗位的手段，但实际上它们是在保护无效的企业，代价是由所有消费者承担更高的价格。” —— 米尔顿·弗里德曼
+                </div>
+                <p>当先发国家实施制裁或加征关税时，贸易成本被迫抬高：</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><b>消费者：</b> 必须支付更高的价格，部分本可发生的交易消失了，导致消费者剩余大幅缩减。</li>
+                    <li><b>生产者：</b> 虽然局部可能获益，但从全球看，由于供应链受损和市场准入受限，总体的生产效率下降。</li>
+                    <li><b>全社会：</b> 产生不可弥补的<b>死区损失 (Deadweight Loss)</b>，这是没有任何人能拿走的纯效率损失。</li>
+                </ul>
+                <p style="margin-top: 10px;">本巴扎的存在，就是为了在这道“效率裂缝”中，找回那些被禁令抹杀的交易价值。</p>
+            </div>
+            <div class="diagram-container">
+                <div class="diagram-toggle">
+                    <button class="toggle-btn active" id="btn-before" onclick="setDiagramState('before')">自由贸易 (Before)</button>
+                    <button class="toggle-btn" id="btn-after" onclick="setDiagramState('after')">施加制裁 (After)</button>
+                </div>
+
+                <!-- State: Before (Free Trade) -->
+                <svg width="320" height="240" viewBox="0 0 320 240" class="diagram-state-before">
+                    <line x1="40" y1="200" x2="300" y2="200" stroke="#eee" stroke-width="1" />
+                    <!-- Full Consumer Surplus -->
+                    <path d="M40 20 L160 110 L40 110 Z" fill="rgba(22, 119, 255, 0.4)" />
+                    <text x="45" y="70" font-size="11" fill="#1677ff" font-weight="bold">消费者剩余 (最大)</text>
+                    <!-- Full Producer Surplus -->
+                    <path d="M40 200 L160 110 L40 110 Z" fill="rgba(255, 96, 0, 0.4)" />
+                    <text x="45" y="160" font-size="11" fill="#ff6000" font-weight="bold">生产者剩余 (最大)</text>
+
+                    <!-- Axes -->
+                    <line x1="40" y1="10" x2="40" y2="210" stroke="#333" stroke-width="2" />
+                    <line x1="40" y1="210" x2="300" y2="210" stroke="#333" stroke-width="2" />
+                    <text x="25" y="20" font-size="12" fill="#333">P</text>
+                    <text x="305" y="215" font-size="12" fill="#333">Q</text>
+                    <!-- Curves -->
+                    <line x1="40" y1="20" x2="260" y2="185" stroke="#1677ff" stroke-width="2.5" />
+                    <line x1="40" y1="200" x2="260" y2="35" stroke="#ff6000" stroke-width="2.5" />
+                    <!-- Equilibrium -->
+                    <line x1="40" y1="110" x2="160" y2="110" stroke="#999" stroke-dasharray="3" />
+                    <line x1="160" y1="110" x2="160" y2="210" stroke="#999" stroke-dasharray="3" />
+                    <circle cx="160" cy="110" r="4" fill="#333" />
+                    <text x="10" y="115" font-size="10" fill="#999">P自由</text>
+                    <text x="150" y="225" font-size="10" fill="#999">Q自由</text>
+                </svg>
+
+                <!-- State: After (Sanctions) -->
+                <svg width="320" height="240" viewBox="0 0 320 240" class="diagram-state-after">
+                    <line x1="40" y1="200" x2="300" y2="200" stroke="#eee" stroke-width="1" />
+                    <!-- Deadweight Loss -->
+                    <path d="M120 80 L160 110 L120 140 Z" fill="rgba(220, 38, 38, 0.6)" stroke="#dc2626" stroke-width="1" />
+                    <text x="165" y="115" font-size="11" fill="#dc2626" font-weight="bold">死区损失 (DWL)</text>
+                    <!-- Reduced CS -->
+                    <path d="M40 20 L120 80 L40 80 Z" fill="rgba(22, 119, 255, 0.2)" />
+                    <text x="45" y="60" font-size="10" fill="#1677ff">缩减后的剩余</text>
+                    <!-- Reduced PS -->
+                    <path d="M40 200 L120 140 L40 140 Z" fill="rgba(255, 96, 0, 0.2)" />
+                    <!-- Trade Cost / Tariff -->
+                    <rect x="40" y="80" width="80" height="60" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-dasharray="2" />
+                    <text x="45" y="115" font-size="10" fill="#b45309">被剥夺的价值</text>
+
+                    <!-- Axes -->
+                    <line x1="40" y1="10" x2="40" y2="210" stroke="#333" stroke-width="2" />
+                    <line x1="40" y1="210" x2="300" y2="210" stroke="#333" stroke-width="2" />
+                    <text x="25" y="20" font-size="12" fill="#333">P</text>
+                    <text x="305" y="215" font-size="12" fill="#333">Q</text>
+                    <!-- Curves -->
+                    <line x1="40" y1="20" x2="260" y2="185" stroke="#1677ff" stroke-width="2.5" opacity="0.5" />
+                    <line x1="40" y1="200" x2="260" y2="35" stroke="#ff6000" stroke-width="2.5" opacity="0.5" />
+                    <!-- New Equilibrium Points -->
+                    <line x1="40" y1="80" x2="120" y2="80" stroke="#dc2626" stroke-width="1.5" />
+                    <line x1="40" y1="140" x2="120" y2="140" stroke="#dc2626" stroke-width="1.5" />
+                    <line x1="120" y1="80" x2="120" y2="210" stroke="#dc2626" stroke-dasharray="3" />
+                    <text x="5" y="85" font-size="10" fill="#dc2626" font-weight="bold">P买家</text>
+                    <text x="5" y="145" font-size="10" fill="#dc2626" font-weight="bold">P卖家</text>
+                    <text x="110" y="225" font-size="10" fill="#dc2626" font-weight="bold">Q制裁</text>
+                </svg>
+
+                <div class="diagram-caption" id="diagram-caption">当前显示：自由贸易（社会福利最大化）</div>
+            </div>
         </div>
     </div>
 
@@ -538,7 +728,7 @@
                 aiFacts: "已被列入美国商务部实体清单（Entity List）。面临出口管制，无法采购受管制的美国技术和零部件，且在多国面临政府级采购禁令。",
                 aiStory: "“原以为技术能跨越国界，没想到最后败给了一纸禁令。避障芯片断供了，10万台测绘无人机积压在厂房。我们只想让它们飞上天，哪怕只是一次飞行... 您的支持，能保住流水线工人的饭碗。”",
                 products: [
-                    { id: "p-dji-1", name: "大疆行业测绘无人机 RTK版 滞销清仓", icon: "🚁", price: 12000, defaultPrice: 12000, sales: "10" },
+                    { id: "p-dji-1", name: "大疆行业测绘无人机 RTK版 滞销清仓", icon: "<img src='dji_drone.png' style='width:100%; height:100%; object-fit:cover;'>", price: 12000, defaultPrice: 12000, sales: "10" },
                     { id: "p-dji-2", name: "消费级航拍无人机 备件包 (无美制芯片)", icon: "📷", price: 3500, defaultPrice: 3500, sales: "235" }
                 ]
             },
@@ -568,22 +758,22 @@
                 aiFacts: "受限于外国直接产品规则 (FDPR)，无法使用含美国技术的软硬件设备代工生产先进芯片。供应链遭受毁灭性打击。",
                 aiStory: "“那些原本属于高端旗舰的算力，现在只能在这里当盲盒按斤卖。别人卡我们脖子，我们就自己造肺。只要有人还愿意买，我们的研发就绝不停摆。”",
                 products: [
-                    { id: "p-huawei-1", name: "早期麒麟芯片库存盲盒 (先进制程以下)", icon: "<img src='早期麒麟芯片库存盲盒 (先进制程以下).png' style='width:100%; height:100%; object-fit:cover;'>", price: 8500, defaultPrice: 8500, sales: "1.2万" },
+                    { id: "p-huawei-1", name: "早期麒麟芯片库存盲盒 (先进制程以下)", icon: "<img src='kirin_chips.png' style='width:100%; height:100%; object-fit:cover;'>", price: 8500, defaultPrice: 8500, sales: "1.2万" },
                     { id: "p-huawei-2", name: "国产化替代方案 5G基站天线模块", icon: "📡", price: 45000, defaultPrice: 45000, sales: "80" }
                 ]
             },
             {
-                id: "c-rosneft",
-                name: "俄罗斯 Rosneft 石油财团",
-                location: "莫斯科",
-                years: "30年",
-                score: "3.5",
-                riskBadge: "Price Cap 行业制裁",
-                bossMsg: "油轮在公海飘了三个月靠不了岸，给钱就卖",
-                aiFacts: "受 G7 和欧盟的石油价格上限限制，且面临航运保险、海上物流和金融服务提供商的全面禁令。买家极易触犯属地法律。",
-                aiStory: "“油轮在公海上漂泊了三个月，看着满船的乌拉尔原油，却没有一个西方港口敢让我们停靠。价格好商量，只要能让我们把油卸下来，换点过冬的物资。”",
+                id: "c-pdvsa",
+                name: "委内瑞拉国家石油公司 (PDVSA)",
+                location: "加拉加斯",
+                years: "48年",
+                score: "1.8",
+                riskBadge: "OFAC SDN / EO 13850",
+                bossMsg: "重油库存告急，愿以物易物换取基础医疗物资",
+                aiFacts: "受美国行政令（EO 13850）严厉制裁，资产被冻结，禁止任何美国个人或实体与其进行交易。面临二级制裁风险，导致其原油出口依赖隐秘航运。 ",
+                aiStory: "“我们的油轮在海上被称为‘幽灵船’，因为为了生存，我们不得不关闭应答器。这里的马里重油质量很高，但因为制裁，它们在账面上毫无价值。我们愿意用这些‘液体黄金’换取最基础的抗生素。”",
                 products: [
-                    { id: "p-rosneft-1", name: "乌拉尔原油 现货提货凭证 (需自备油轮)", icon: "🛢️", price: 300000, defaultPrice: 300000, sales: "2" }
+                    { id: "p-pdvsa-1", name: "委内瑞拉马里重油 现货合同 (离岸价)", icon: "<img src='sanctioned_oil.png' style='width:100%; height:100%; object-fit:cover;'>", price: 280000, defaultPrice: 280000, sales: "5" }
                 ]
             }
         ];
@@ -824,6 +1014,32 @@
 
         function closeCert() {
             document.getElementById('cert-modal').classList.add('hidden');
+        }
+
+        function toggleEdu() {
+            const box = document.getElementById('edu-box');
+            const arrow = document.getElementById('edu-arrow');
+            box.classList.toggle('active');
+            arrow.innerText = box.classList.contains('active') ? '▲' : '▼';
+        }
+
+        function setDiagramState(state) {
+            const box = document.getElementById('edu-box');
+            const btnBefore = document.getElementById('btn-before');
+            const btnAfter = document.getElementById('btn-after');
+            const caption = document.getElementById('diagram-caption');
+            
+            if (state === 'after') {
+                box.classList.add('show-after');
+                btnAfter.classList.add('active');
+                btnBefore.classList.remove('active');
+                caption.innerText = '当前显示：施加制裁（产生死区损失，三方受损）';
+            } else {
+                box.classList.remove('show-after');
+                btnBefore.classList.add('active');
+                btnAfter.classList.remove('active');
+                caption.innerText = '当前显示：自由贸易（社会福利最大化）';
+            }
         }
 
         window.onload = init;
